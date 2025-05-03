@@ -1,0 +1,88 @@
+QWidget {
+    color: white;
+    background-color: rgb(34, 34, 34);
+}
+/* Поля ввода */
+QLineEdit {
+    background-color: rgb(48, 48, 48);
+    color: white;
+    border: 1px solid #898989;
+    border-radius: 7px;
+    padding: 5px;
+}
+
+/* Комбобокс */
+QComboBox {
+    background-color: rgb(48, 48, 48);
+    color: white;
+    border: 1px solid #898989;
+    border-radius: 7px;
+    padding: 5px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: rgb(45, 45, 45);
+    color: white;
+    border: 1px solid #898989;
+    selection-background-color: #505050;
+}
+
+/* Кнопки */
+QPushButton {
+    background-color: rgb(48, 48, 48);
+    color: white;
+    border: 1px solid #898989;
+    border-radius: 7px;
+    padding: 6px 12px;
+}
+
+QPushButton:hover {
+    background-color: #444;
+}
+
+QPushButton:pressed {
+    background-color: #666;
+}
+
+/* Чекбоксы */
+QCheckBox {
+    color: white;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #898989;
+    border-radius: 4px;
+    background-color: rgb(34, 34, 34);
+}
+
+QCheckBox::indicator:checked {
+    background-color: #505050;
+    border: 1px solid #898989;
+}
+/* Таблица */
+
+QTableWidget#foodTable {
+    background-color: transparent;
+    border: 1px solid #898989;
+    border-radius: 1px;
+    color: white;
+    gridline-color: #898989;
+    font-size: 14px;
+    width: 100%;
+}
+
+QTableWidget#foodTable QHeaderView::section {
+    background-color:rgb(77, 77, 77);
+    color: white;
+    border: 1px solid rgb(27, 27, 27);
+    padding: 4px;
+}
+
+QTableWidget#foodTable QTableCornerButton::section {
+    background-color: rgb(45, 45, 45);
+    border: 1px solid rgb(27, 27, 27);
+    border-radius: 7px;
+}

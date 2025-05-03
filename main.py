@@ -2,8 +2,8 @@ import sys
 import logging
 from abc import ABC, abstractmethod
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QWidget, QLineEdit, QDialog, QTableWidget, \
-    QTableWidgetItem, QCheckBox, QMessageBox
+from PyQt6.QtWidgets import (QApplication, QPushButton, QLabel, QVBoxLayout, QWidget, QLineEdit, QDialog,
+                             QTableWidget, QTableWidgetItem, QCheckBox, QMessageBox, QComboBox)
 
 logging.basicConfig(
     filename='log.txt',
@@ -13,13 +13,13 @@ logging.basicConfig(
 
 class Person(ABC):
     def __init__(self, name):
-        self._name = name  # защищённый атрибут
+        self._name = name
 
     @abstractmethod
     def get_name(self):
         pass
 
-    def show_info(self):  # базовый метод
+    def show_info(self):
         print(f"[Person] Name: {self._name}")
 
 class User(Person):
@@ -58,12 +58,12 @@ class User(Person):
             return (10 * self.__weight) + (6.25 * self.__height) - (5 * self.__years_old) - 161
         return 0
 
-    def show_info(self):  # переопределение метода
+    def show_info(self):
         print(f"[User] Name: {self._name}, Weight: {self.__weight}, Age: {self.__years_old}")
 
-    def dual_info(self, reverse=False):  # использует и свой метод, и метод базового класса
+    def dual_info(self, reverse=False):
         if reverse:
-            super().show_info()  # вызов базового
+            super().show_info()
             self.show_info()
         else:
             self.show_info()
@@ -72,8 +72,6 @@ class User(Person):
     @staticmethod
     def get_users_count():
         return User.users_count
-
-
 
 class Food:
     def __init__(self, name_food, calories, proteins, fats, carbohydrates):
@@ -133,87 +131,54 @@ class Meal:
     def get_total_calories(self):
         return sum(food.get_calories() for food in self.food_items)
 
-class Breakfast(Meal):
-    pass
-
-class Lunch(Meal):
-    pass
-
-class Dinner(Meal):
-    pass
-
-class Snack(Meal):
-    pass
-
+class Breakfast(Meal): pass
+class Lunch(Meal): pass
+class Dinner(Meal): pass
+class Snack(Meal): pass
 
 class ChildWindow(QDialog):
     def __init__(self, user):
         super().__init__()
         self.userC = user
+        self.product_list = ["Яблоко", "Хлеб", "Молоко"]
         self.init_ui()
-        self.flag_BreakFast = 0
-        self.flag_Dinner = 0
-        self.flag_Lunch = 0
-        self.flag_Snack = 0
+        self.flag_BreakFast = self.flag_Dinner = self.flag_Lunch = self.flag_Snack = 0
         self.breakfast = Breakfast()
         self.lunch = Lunch()
         self.dinner = Dinner()
         self.snack = Snack()
 
     def checkbox_Breakfast(self, state):
-        if state == 2:
-            self.flag_BreakFast = 1
-            self.Dinner_check.setEnabled(False)
-            self.Lunch_check.setEnabled(False)
-            self.Snack_check.setEnabled(False)
-        else:
-            self.flag_BreakFast = 0
-            self.Dinner_check.setEnabled(True)
-            self.Lunch_check.setEnabled(True)
-            self.Snack_check.setEnabled(True)
+        self.flag_BreakFast = state == Qt.CheckState.Checked
+        self._set_enabled_except(self.BreakFast_check, not self.flag_BreakFast)
 
     def checkbox_Dinner(self, state):
-        if state == 2:
-            self.flag_Dinner = 1
-            self.BreakFast_check.setEnabled(False)
-            self.Lunch_check.setEnabled(False)
-            self.Snack_check.setEnabled(False)
-        else:
-            self.flag_Dinner = 0
-            self.BreakFast_check.setEnabled(True)
-            self.Lunch_check.setEnabled(True)
-            self.Snack_check.setEnabled(True)
+        self.flag_Dinner = state == Qt.CheckState.Checked
+        self._set_enabled_except(self.Dinner_check, not self.flag_Dinner)
 
     def checkbox_Lunch(self, state):
-        if state == 2:
-            self.flag_Lunch = 1
-            self.BreakFast_check.setEnabled(False)
-            self.Dinner_check.setEnabled(False)
-            self.Snack_check.setEnabled(False)
-        else:
-            self.flag_Lunch = 0
-            self.BreakFast_check.setEnabled(True)
-            self.Dinner_check.setEnabled(True)
-            self.Snack_check.setEnabled(True)
+        self.flag_Lunch = state == Qt.CheckState.Checked
+        self._set_enabled_except(self.Lunch_check, not self.flag_Lunch)
 
     def checkbox_Snack(self, state):
-        if state == 2:
-            self.flag_Snack = 1
-            self.BreakFast_check.setEnabled(False)
-            self.Dinner_check.setEnabled(False)
-            self.Lunch_check.setEnabled(False)
-        else:
-            self.flag_Snack = 0
-            self.BreakFast_check.setEnabled(True)
-            self.Dinner_check.setEnabled(True)
-            self.Lunch_check.setEnabled(True)
+        self.flag_Snack = state == Qt.CheckState.Checked
+        self._set_enabled_except(self.Snack_check, not self.flag_Snack)
+
+    def _set_enabled_except(self, checkbox, enabled):
+        for cb in [self.BreakFast_check, self.Dinner_check, self.Lunch_check, self.Snack_check]:
+            if cb != checkbox:
+                cb.setEnabled(enabled)
 
     def add_food(self):
-        food_name = self.enterFoodName.text()
+        food_name = self.enterFoodName.currentText()
         calories = self.enterFood_calories.text()
         proteins = self.enterproteins.text()
         fats = self.enterFats.text()
         carbs = self.enterCarbs.text()
+
+        if food_name not in self.product_list:
+            self.product_list.append(food_name)
+            self.enterFoodName.addItem(food_name)
 
         food_item = Food(food_name, calories, proteins, fats, carbs)
 
@@ -234,98 +199,74 @@ class ChildWindow(QDialog):
         logging.info("Добавлена еда: %s (%s ккал)", food_name, calories)
 
     def clear_food_fields(self):
-        self.enterFoodName.clear()
         self.enterFood_calories.clear()
         self.enterproteins.clear()
         self.enterFats.clear()
         self.enterCarbs.clear()
 
-    from PyQt6.QtWidgets import QMessageBox
-
     def show_top_foods(self):
-        meals = [
-            ("Завтрак", self.breakfast),
-            ("Обед", self.lunch),
-            ("Ужин", self.dinner),
-            ("Перекус", self.snack)
-        ]
-
+        meals = [("Завтрак", self.breakfast), ("Обед", self.lunch), ("Ужин", self.dinner), ("Перекус", self.snack)]
         result = ""
-
         for name, meal in meals:
             if not meal.food_items:
                 result += f"{name}: нет данных\n\n"
                 continue
-
-            top_foods = sorted(meal.food_items, key=lambda food: food.get_calories(), reverse=True)[:3]
-            result += f"{name} (топ по калориям):\n"
-            result += "\n".join(f"{i + 1}. {food}" for i, food in enumerate(top_foods)) + "\n\n"
-
+            top_foods = sorted(meal.food_items, key=lambda f: f.get_calories(), reverse=True)[:3]
+            result += f"{name} (топ по калориям):\n" + "\n".join(f"{i+1}. {food}" for i, food in enumerate(top_foods)) + "\n\n"
         QMessageBox.information(self, "Топ продукты по калориям", result.strip())
 
     def init_ui(self):
         self.setWindowTitle(f"CalCulc-user({self.userC.get_name()})")
         self.setGeometry(150, 150, 500, 300)
-        self.layout = QVBoxLayout()
+        self.setStyleSheet(open("style.qss", "r").read())
+        layout = QVBoxLayout()
 
-        caloriesCount = self.userC.calories_culc()
-        self.calories_normal = QLabel(f'Ваша норма калорий: {caloriesCount}')
+        self.calories_normal = QLabel(f'Ваша норма калорий: {self.userC.calories_culc()}')
 
         self.table = QTableWidget(4, 3)
+        self.table.setColumnWidth(0, 123)
+        self.table.setColumnWidth(1, 205)
+        self.table.setColumnWidth(2, 123)
+        self.table.setFixedHeight(156)
+
+        self.table.setObjectName("foodTable")
         self.table.setHorizontalHeaderLabels(["Приём пищи", "Сколько съедено", "Цель"])
-        data = [
-            ["Завтрак", "", str(caloriesCount / 4)],
-            ["Обед", "", str(caloriesCount / 4)],
-            ["Ужин", "", str(caloriesCount / 4)],
-            ["Перекус", "", str(caloriesCount / 4)]
-        ]
+        for i, name in enumerate(["Завтрак", "Обед", "Ужин", "Перекус"]):
+            self.table.setItem(i, 0, QTableWidgetItem(name))
+            self.table.setItem(i, 2, QTableWidgetItem(str(self.userC.calories_culc() / 4)))
 
-        for row, rowData in enumerate(data):
-            for col, value in enumerate(rowData):
-                self.table.setItem(row, col, QTableWidgetItem(value))
+        self.enterFoodName = QComboBox()
+        self.enterFoodName.addItems(self.product_list)
 
-        self.Food_label = QLabel('Food data')
-
-        self.Food_name = QLabel('Food name')
-        self.enterFoodName = QLineEdit()
-
-        self.Food_calories = QLabel('Food calories')
         self.enterFood_calories = QLineEdit()
-
-        self.proteins = QLabel('Food proteins')
         self.enterproteins = QLineEdit()
-
-        self.carbs = QLabel('Food carbs')
+        self.enterFats = QLineEdit()
         self.enterCarbs = QLineEdit()
 
-        self.fats = QLabel('Food fats')
-        self.enterFats = QLineEdit()
+        self.BreakFast_check = QCheckBox('Завтрак')
+        self.Dinner_check = QCheckBox('Ужин')
+        self.Lunch_check = QCheckBox('Обед')
+        self.Snack_check = QCheckBox('Перекус')
 
-        self.BreakFast_check = QCheckBox('Breakfast', self)
         self.BreakFast_check.stateChanged.connect(self.checkbox_Breakfast)
-
-        self.Dinner_check = QCheckBox('Dinner', self)
         self.Dinner_check.stateChanged.connect(self.checkbox_Dinner)
-
-        self.Lunch_check = QCheckBox('Lunch', self)
         self.Lunch_check.stateChanged.connect(self.checkbox_Lunch)
-
-        self.Snack_check = QCheckBox('Snack', self)
         self.Snack_check.stateChanged.connect(self.checkbox_Snack)
 
-        self.add_Button = QPushButton('Add food', self)
+        self.add_Button = QPushButton('Добавить еду')
         self.add_Button.clicked.connect(self.add_food)
 
-        self.top_food_button = QPushButton('Показать топ продуктов по калориям')
+        self.top_food_button = QPushButton('Топ продукты по калориям')
         self.top_food_button.clicked.connect(self.show_top_foods)
 
-        for widget in [self.calories_normal, self.table, self.Food_label, self.Food_name, self.enterFoodName, self.Food_calories, self.enterFood_calories,
-                       self.proteins, self.enterproteins, self.carbs, self.enterCarbs, self.fats, self.enterFats,
-                       self.BreakFast_check, self.Dinner_check, self.Lunch_check, self.Snack_check, self.add_Button, self.top_food_button]:
-            self.layout.addWidget(widget)
+        for w in [self.calories_normal, self.table, QLabel('Название еды:'), self.enterFoodName,
+                  QLabel('Калории:'), self.enterFood_calories, QLabel('Белки:'), self.enterproteins,
+                  QLabel('Жиры:'), self.enterFats, QLabel('Углеводы:'), self.enterCarbs,
+                  self.BreakFast_check, self.Dinner_check, self.Lunch_check, self.Snack_check,
+                  self.add_Button, self.top_food_button]:
+            layout.addWidget(w)
 
-        self.setLayout(self.layout)
-
+        self.setLayout(layout)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -333,74 +274,49 @@ class MainWindow(QWidget):
         self.init_ui()
 
     def show_message(self, type):
-        if type == 1:
-            msg = QMessageBox()
-            msg.setWindowTitle("Уведомление")
-            msg.setText("Действие выполненно")
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-            msg.exec()
-        elif type == 0:
-            msg = QMessageBox()
-            msg.setWindowTitle("Ошибка")
-            msg.setText("Ошибка: не корректные данные")
-            msg.setIcon(QMessageBox.Icon.Critical)
-            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-            msg.exec()
+        msg = QMessageBox()
+        msg.setWindowTitle("Уведомление" if type else "Ошибка")
+        msg.setText("Действие выполнено" if type else "Ошибка: некорректные данные")
+        msg.setIcon(QMessageBox.Icon.Information if type else QMessageBox.Icon.Critical)
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg.exec()
 
     def set_user_data(self):
         try:
             self.user_data = User(
-                self.enterName.text(),
-                self.enterWeight.text(),
-                self.enterHeight.text(),
-                self.enterAge.text(),
-                self.enterGender.text()
+                self.enterName.text(), self.enterWeight.text(), self.enterHeight.text(),
+                self.enterAge.text(), self.enterGender.text()
             )
-            self.child_window = ChildWindow(self.user_data)
-            self.child_window.exec()
+            ChildWindow(self.user_data).exec()
         except ValueError:
             self.show_message(0)
             logging.error("Ошибка ввода данных пользователем")
-        finally:
+        else:
             self.show_message(1)
             logging.info("Пользователь создан: %s", self.enterName.text())
 
     def init_ui(self):
         self.setWindowTitle("CalCucl")
-        self.resize(200, 230)
-        self.layout = QVBoxLayout()
+        self.setStyleSheet(open("style.qss", "r").read())
+        layout = QVBoxLayout()
 
-        self.user_label = QLabel('User data')
-
-        self.user_name = QLabel('User name')
         self.enterName = QLineEdit()
-
-        self.user_Weight = QLabel('User weight')
         self.enterWeight = QLineEdit()
-
-        self.user_Height = QLabel('User height')
         self.enterHeight = QLineEdit()
-
-        self.user_Age = QLabel('User age')
         self.enterAge = QLineEdit()
-
-        self.user_Gender = QLabel('User gender(male/female)')
         self.enterGender = QLineEdit()
+        button = QPushButton("Ввести")
+        button.clicked.connect(self.set_user_data)
 
-        self.button = QPushButton("Enter")
-        self.button.setFixedSize(100, 30)
-        self.button.clicked.connect(self.set_user_data)
+        for w in [QLabel('Данные пользователя'), QLabel('Имя'), self.enterName, QLabel('Вес'), self.enterWeight,
+                  QLabel('Рост'), self.enterHeight, QLabel('Возраст'), self.enterAge,
+                  QLabel('Пол (male/female)'), self.enterGender, button]:
+            layout.addWidget(w)
 
-        for widget in [self.user_label, self.user_name, self.enterName, self.user_Weight, self.enterWeight,
-                       self.user_Height, self.enterHeight, self.user_Age, self.enterAge, self.user_Gender,
-                       self.enterGender, self.button]:
-            self.layout.addWidget(widget)
-
-        self.setLayout(self.layout)
+        self.setLayout(layout)
         self.show()
 
-
-app = QApplication(sys.argv)
-window = MainWindow()
-sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
